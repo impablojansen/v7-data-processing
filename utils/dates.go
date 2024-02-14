@@ -9,14 +9,14 @@ func TransformDate(rawDates series.Series, seriesName string) series.Series {
 	var dates []string
 
 	for i := 0; i < rawDates.Len(); i++ {
-		var year string = rawDates.Elem(i).String()[4:8]
-		var month string = rawDates.Elem(i).String()[2:4]
-		var day string = rawDates.Elem(i).String()[0:2]
+		var y string = rawDates.Elem(i).String()[4:8]
+		var m string = rawDates.Elem(i).String()[2:4]
+		var d string = rawDates.Elem(i).String()[0:2]
 
-		s := []string{year, month, day}
-		formattedDate := strings.Join(s, "-")
+		s := []string{y, m, d}
+		fmtDate := strings.Join(s, "-")
 
-		dates = append(dates, formattedDate)
+		dates = append(dates, fmtDate)
 	}
 
 	return series.New(dates, series.String, seriesName)

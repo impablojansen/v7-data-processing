@@ -2,55 +2,53 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-gota/gota/dataframe"
-	"github.com/go-gota/gota/series"
-	"log"
-	"os"
-	"strings"
+	"tratar_base/utils"
 )
 
 func main() {
-	file1, err := os.Open("csv_principal.csv")
-	file2, err := os.Open("csv_suporte.csv")
-	defer file1.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file2.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	df := dataframe.ReadCSV(file1, dataframe.DefaultType(series.String), dataframe.DetectTypes(false))
+	//fmt.Println("a")
+	//file1, _ := os.Open("csv_principal.csv")
+	//fmt.Println("a")
+	//file2, err := os.Open("csv_suporte.csv")
+	//defer file1.Close()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer file2.Close()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//df := dataframe.ReadCSV(file1, dataframe.DefaultType(series.String), dataframe.DetectTypes(false))
 	//df2 := dataframe.ReadCSV(file2)
 
-	//joinVariable := df.LeftJoin(df2, "LOCALIDADE")
+	df := utils.FileManager("csv_principal.csv")
 
-	dateTransform := func(s series.Series) series.Series {
-		strings := s.String()
-		//fmt.Println(s.Elem(0))
-		//fmt.Println(s.Elem(1))
-		return series.Strings(strings)
-	}
+	//df2 := utils.FileManager("csv_suporte.csv")
+
+	//joinVariable := df.LeftJoin(df2, "NOM-LOCAL-FAM")
+
+	fmt.Println(df)
 
 	col1 := df.Col("DATA")
 
-	var dates []string
-
-	for i := 0; i < col1.Len(); i++ {
-		var year string = col1.Elem(i).String()[4:8]
-		var month string = col1.Elem(i).String()[2:4]
-		var day string = col1.Elem(i).String()[0:2]
-
-		s := []string{year, month, day}
-		dt := strings.Join(s, "-")
-
-		dates = append(dates, dt)
-	}
-	seriesTest := series.New(dates, series.String, "DATA")
+	fmt.Println(col1)
+	//var dates []string
+	//
+	//for i := 0; i < col1.Len(); i++ {
+	//	var year string = col1.Elem(i).String()[4:8]
+	//	var month string = col1.Elem(i).String()[2:4]
+	//	var day string = col1.Elem(i).String()[0:2]
+	//
+	//	s := []string{year, month, day}
+	//	dt := strings.Join(s, "-")
+	//
+	//	dates = append(dates, dt)
+	//}
+	seriesTest := utils.TransformDate(col1, "Datas")
 
 	fmt.Println(seriesTest)
 
-	df = df.Capply(dateTransform)
+	//df = df.Capply(dateTransform)
 	//fmt.Println(joinVariable)
 
 	//var s []string
