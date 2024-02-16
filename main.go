@@ -11,10 +11,13 @@ func main() {
 
 	joinVariable := df.LeftJoin(df2, "NOM-LOCAL-FAM")
 
-	col1 := joinVariable.Col("DATA")
+	//col1 := joinVariable.Col("DATA")
 
-	seriesTest := utils.TransformDate(col1, "DATA")
-	joinVariable = joinVariable.Mutate(seriesTest)
+	//seriesTest := utils.SeriesToDate(col1, "DATA")
+	//joinVariable = joinVariable.Mutate(seriesTest)
 
-	fmt.Println(joinVariable)
+	//t := utils.TransformDates(joinVariable)
+	//fmt.Println(t)
+	t := utils.TransformNumbers(joinVariable)
+	fmt.Println(t)
 }
