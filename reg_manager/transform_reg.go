@@ -1,4 +1,4 @@
-package utils
+package reg_manager
 
 import (
 	"github.com/go-gota/gota/dataframe"
@@ -7,9 +7,12 @@ import (
 )
 
 func CorrectReg01(df, loc, ter dataframe.DataFrame) dataframe.DataFrame {
+	df = DropColumns(df)
 	df = JoinAddressParts(df)
-	df = JoinDF(df, loc, "NOM-LOCALIDADE-FAM")
-	df = JoinDF(df, ter, "LOCAL-CORRETA")
+	locName := loc.Names()
+	terName := ter.Names()
+	loc = JoinDF(loc, ter, locName[0])
+	df = JoinDF(df, loc, terName[0])
 
 	return df
 }
@@ -35,4 +38,15 @@ func JoinAddressParts(df dataframe.DataFrame) dataframe.DataFrame {
 
 	newDf := dataframe.New(series.New(addressColumn, series.String, "ENDERECO"))
 	return df.CBind(newDf)
+}
+
+func DropColumns(df dataframe.DataFrame) dataframe.DataFrame {
+	//df = df.Drop(0)
+	dfCols := df.Names()
+	for i, col := range dfCols {
+		if col == "VAZIO" || col == "\ufeffCHV-NATURAL-PREFEITURA-FAM" {
+			df = df.Drop(i)
+		}
+	}
+	return df
 }

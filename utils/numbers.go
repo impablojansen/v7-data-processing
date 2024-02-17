@@ -12,15 +12,17 @@ func TransformNumbers(df dataframe.DataFrame) dataframe.DataFrame {
 	for _, col := range dfCols {
 		if strings.HasPrefix(col, "VLR-") || strings.HasPrefix(col, "VAL-") || strings.HasPrefix(col, "QTD-") || strings.HasPrefix(col, "NUM-LOG") {
 			s := df.Col(col)
-			strToInt, _ := s.Int()
 
 			if strings.HasPrefix(col, "VLR-RENDA") {
-				strToInt = TransformMoney(strToInt)
-				df = df.Mutate(series.New(strToInt, series.Int, col))
+				strToInt, _ := s.Int()
+				newDf := TransformMoney(strToInt)
+				df = df.Mutate(series.New(newDf, series.Int, col))
 			} else if strings.HasPrefix(col, "NUM-LOG") {
+				strToInt := s.Records()
 				addressList := TransformAddressNumber(strToInt)
 				df = df.Mutate(series.New(addressList, series.String, col))
 			} else {
+				strToInt, _ := s.Int()
 				df = df.Mutate(series.New(strToInt, series.Int, col))
 			}
 		}
@@ -35,11 +37,12 @@ func TransformMoney(n []int) []int {
 	return n
 }
 
-func TransformAddressNumber(n []int) []string {
+func TransformAddressNumber(n []string) []string {
 	var addressList []string
 	for i, val := range n {
-		if n[i] > 0 {
-			num := val / 1
+		if n[i] != "" {
+			num, _ := strconv.Atoi(val)
+			num = num / 1
 			addressList = append(addressList, strconv.Itoa(num))
 		} else {
 			addressList = append(addressList, "")
