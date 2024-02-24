@@ -1,40 +1,50 @@
 package create_dataframe
 
 import (
+	"errors"
 	"github.com/go-gota/gota/dataframe"
-	"github.com/northbright/xls2csv-go/xls2csv"
+	"github.com/go-gota/gota/series"
 	"log"
+	"os"
 	"strings"
+	"tratar_base/utils"
 )
-
-type df struct {
-	data     *dataframe.DataFrame
-	fileType string
-	options  *dataframe.LoadOption
-}
 
 var (
-	dfInstance *df
+	allowedExtensions = [...]string{"csv", "xlsx"}
 )
 
-//func NewDF(data) (*df, error) {
-//	strings.Contains()
-//	df, err :=
-//	dfInstance = &df{df}
-//	df{
-//		*
-//	}
-//}}
-
-func DetectType(fileName string) string {
-	_, fileType, _ := strings.Cut(fileName, ".")
-	return fileType
-}
-
-func xlsxToCsv(filePath string) [][]string {
-	records, err := xls2csv.XLS2CSV(filePath, 0)
+func DataframeGenerator(path string) dataframe.DataFrame {
+	fileExt, err := DetectType(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return records
+
+	if fileExt != "csv" {
+		path = utils.XlsxConverter(fileExt, path)
+	}
+
+	return transformDf(path)
+}
+
+func DetectType(path string) (string, error) {
+	names := strings.Split(path, ".")
+	fileExt := names[len(names)-1]
+
+	for _, val := range allowedExtensions {
+		if fileExt == val {
+			return fileExt, nil
+		}
+	}
+	return "", errors.New("extension not allowed")
+}
+
+func transformDf(path string) dataframe.DataFrame {
+	f, err := os.Open(path)
+	defer f.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	df := dataframe.ReadCSV(f, dataframe.DefaultType(series.String), dataframe.DetectTypes(false))
+	return df
 }

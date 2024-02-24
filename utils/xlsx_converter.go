@@ -5,42 +5,54 @@ import (
 	"github.com/tealeg/xlsx/v3"
 	"log"
 	"os"
+	"strings"
 )
 
-func XLSX_converter() {
-	wb, err := xlsx.OpenFile("teste.xlsx")
+func XlsxConverter(fileExt, path string) string {
+	oldS, newS := "."+fileExt, ".csv"
+	wb, err := xlsx.OpenFile(path)
 	if err != nil {
 		panic(err)
 	}
 
-	sheetName := wb.Sheets[0]
+	newPath := strings.Replace(path, oldS, newS, -1)
+	sheetName := wb.Sheets[0].Name
+	sheet, ok := wb.Sheet[sheetName]
 
-	sh, ok := wb.Sheet[sheetName.Name]
 	if !ok {
 		panic(errors.New("sheet not found"))
 	}
 
-	file, err := os.OpenFile("new_test.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(newPath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	colQt, rowQt := sh.MaxCol, sh.MaxRow
+	defer file.Close()
+	xlsxToCsv(sheet, file, sheet.MaxCol, sheet.MaxRow)
 
-	for i := 0; i < rowQt; i++ {
+	return newPath
+}
+
+func xlsxToCsv(sheet *xlsx.Sheet, file *os.File, cols, rows int) {
+	for i := 0; i < rows; i++ {
 		var rowString string
-		for j := 0; j < colQt; j++ {
-			c, _ := sh.Cell(i, j)
-			if j < colQt-1 {
-				str := c.String() + ","
+		for j := 0; j < cols; j++ {
+			cellValue, err := sheet.Cell(i, j)
+			if err != nil {
+				file.Close()
+				log.Fatal(err)
+				return
+			} else if j < cols-1 {
+				str := cellValue.String() + ","
 				rowString = rowString + str
 			} else {
-				str := c.String() + "\n"
+				str := cellValue.String() + "\n"
 				rowString = rowString + str
 			}
 		}
-		_, err = file.Write([]byte(rowString))
+		_, err := file.Write([]byte(rowString))
 		if err != nil {
 			file.Close()
 			log.Fatal(err)

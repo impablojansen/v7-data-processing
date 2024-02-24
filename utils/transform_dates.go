@@ -9,15 +9,15 @@ import (
 func TransformDates(df dataframe.DataFrame) dataframe.DataFrame {
 	dfCols := df.Names()
 	for _, c := range dfCols {
-		if strings.HasPrefix(c, "DAT") || strings.HasPrefix(c, "DTA") {
-			s := SeriesToDate(df.Col(c), c)
+		if strings.HasPrefix(c, "DAT") || strings.HasPrefix(c, "DTA") || strings.HasPrefix(c, "DT_") {
+			s := seriesToDate(df.Col(c), c)
 			df = df.Mutate(s)
 		}
 	}
 	return df
 }
 
-func SeriesToDate(rawDates series.Series, seriesName string) series.Series {
+func seriesToDate(rawDates series.Series, seriesName string) series.Series {
 	var dates []string
 
 	for i := 0; i < rawDates.Len(); i++ {
